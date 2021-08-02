@@ -5,11 +5,27 @@ import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class ShellExecutor {
+    private static Runtime run = Runtime.getRuntime();
+    private static String cmd;
+    private static Process process;
+
     public static String getRoutesFromShell() throws IOException, InterruptedException {
-        String cmd = "ip -j route";
-        Runtime run = Runtime.getRuntime();
-        Process process = run.exec(cmd);
+        cmd = "ip -j route";
+
+        process = run.exec(cmd);
         process.waitFor();
         return new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
+    }
+
+    public static void addRoute(Channel route) throws IOException, InterruptedException {
+        cmd = "ip route add " + route.dst + " via " + route.gateway;
+        process = run.exec(cmd);
+        process.waitFor();
+    }
+
+    public static void removeRoute(Channel route) throws IOException, InterruptedException {
+        cmd = "ip route remove " + route.dst + " via " + route.gateway;
+        process = run.exec(cmd);
+        process.waitFor();
     }
 }
