@@ -20,9 +20,5 @@ public class Main {
         for (Channel route: routes) {
             System.out.println(route);
         }
-
-
-
-
     }
 }

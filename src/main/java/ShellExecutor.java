@@ -1,11 +1,9 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 public class ShellExecutor {
-    private static Runtime run = Runtime.getRuntime();
+    private static final Runtime run = Runtime.getRuntime();
     private static String cmd;
     private static Process process;
 
