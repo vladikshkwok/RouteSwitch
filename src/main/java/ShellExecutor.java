@@ -25,5 +25,6 @@ public class ShellExecutor {
         cmd = "ip route remove " + route.dst + " via " + route.gateway;
         process = run.exec(cmd);
         process.waitFor();
+
     }
 }
