@@ -12,11 +12,11 @@ public class Channel {
     boolean isGwConnected;
     boolean isDstConnected;
 
-    public static ArrayList<Channel> getChannelsFromJSON (String fileURL) {
+    public static ArrayList<Channel> getChannelsFromJSON (File file) {
         ArrayList<Channel> channels = new ArrayList<>();
         gson = new Gson();
         try {
-            String jsonString = new Scanner(new File(fileURL)).useDelimiter("\\Z").next();
+            String jsonString = new Scanner(file).useDelimiter("\\Z").next();
             Collections.addAll(channels, gson.fromJson(jsonString, Channel[].class));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -24,7 +24,7 @@ public class Channel {
 
         return channels;
     }
-    public static ArrayList<Channel> getChannelsFromJSONString (String jsonString) {
+    public static ArrayList<Channel> getChannelsFromJSON (String jsonString) {
         gson = new Gson();
         ArrayList<Channel> channels = new ArrayList<>();
         Collections.addAll(channels, gson.fromJson(jsonString, Channel[].class));
