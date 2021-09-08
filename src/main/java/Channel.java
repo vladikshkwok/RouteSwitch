@@ -1,6 +1,11 @@
 import com.google.gson.Gson;
+import com.google.gson.internal.bind.util.ISO8601Utils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -11,6 +16,9 @@ public class Channel {
     String dst;
     boolean isGwConnected;
     boolean isDstConnected;
+
+    public Channel () {
+    }
 
     public static ArrayList<Channel> getChannelsFromJSON (File file) {
         ArrayList<Channel> channels = new ArrayList<>();
@@ -29,6 +37,24 @@ public class Channel {
         ArrayList<Channel> channels = new ArrayList<>();
         Collections.addAll(channels, gson.fromJson(jsonString, Channel[].class));
         return channels;
+    }
+
+    public void checkConnection (String ipAddr) {
+        InetAddress inAddr = null;
+        try {
+            inAddr = InetAddress.getByName(ipAddr);
+            System.out.println("Checking ip addr: " + ipAddr);
+            if (inAddr.isReachable(2000)){
+                isGwConnected = true;
+            } else {
+                isGwConnected = false;
+            }
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void CheckRoutes (ArrayList<Channel> channels) {

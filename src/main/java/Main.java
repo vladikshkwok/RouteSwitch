@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
-       ArrayList<Channel> channels = Channel.getChannelsFromJSON(new File("/home/vladikshk/IdeaProjects/RouteSwitch/src/main/resources/channels.json"));
-       ArrayList<Server> servers = Server.getServersFromJSON(new File("/home/vladikshk/IdeaProjects/RouteSwitch/src/main/resources/servers.json"));
+       ArrayList<Channel> channels = Channel.getChannelsFromJSON( new File("/home/vshkarubov/IdeaProjects/RouteSwitch/src/main/resources/channels.json"));
 
         for (Channel channel: channels) {
+            channel.checkConnection(channel.gateway);
             System.out.println(channel);
         }
 
@@ -22,11 +22,5 @@ public class Main {
         for (Channel route: routes) {
             System.out.println(route);
         }
-
-
-        for (Server server: servers) {
-            System.out.println(server);
-        }
-
     }
 }
