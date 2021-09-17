@@ -31,12 +31,31 @@ public class Server {
         return channels;
     }
 
+    public void  setRouteToServer(ArrayList<Channel> routes) {
+        boolean needRoute = false;
+        for (String gw: gateways) {
+            for (Channel route : routes) {
+                if (gw.equals(route.gateway) && route.isDstConnected) {
+                    needRoute = true;
+                } else {
+                    System.out.println("Skip " + dst + " through " + gw);
+                }
+                if (gw.equals(route.gateway) && dst.equals(route.dst))
+                    needRoute = false;
+            }
+        }
+        if (needRoute) {
+            System.out.println(dst + " --- Нужен маршрут");
+        }
+    }
+
+
     @Override
     public String toString() {
-        String gatewayString = "";
+        StringBuilder gatewayString = new StringBuilder();
         for (String gateway: gateways)
-            gatewayString += "gateway: '" + gateway + ", ";
-        gatewayString += "\b\b";
+            gatewayString.append("gateway: '").append(gateway).append(", ");
+        gatewayString.append("\b\b");
         return "Server{" +
                 "dst='" + dst + ", '" +
                 gatewayString + "}";
