@@ -16,23 +16,5 @@
     "dst": "77.88.8.8",
     "isGwConnected": true,
     "isDstConnected": true
-  },
-  {
-    "gateway": "192.168.0.2",
-    "dst": "91.203.37.18",
-    "isGwConnected": true,
-    "isDstConnected": true
-  },
-  {
-    "gateway": "192.168.0.2",
-    "dst": "91.203.37.19",
-    "isGwConnected": true,
-    "isDstConnected": true
-  },
-  {
-    "gateway": "192.168.0.1",
-    "dst": "91.203.37.20",
-    "isGwConnected": true,
-    "isDstConnected": false
   }
 ]
