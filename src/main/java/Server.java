@@ -70,7 +70,7 @@ public class Server {
             if (thereSameServerRoute)
                 return;
             else {
-                if () //vladik gay
+                if () //vladik gay)
                 for (Channel serv: thereSameServers) {
 
                 }
