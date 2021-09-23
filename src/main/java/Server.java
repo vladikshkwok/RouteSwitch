@@ -64,21 +64,38 @@ public class Server {
 
 
     public void  setRouteToServer(List<Channel> routes, List<Channel> gatewayList) {
+        boolean addedServer = false;
         List<Channel> thereSameServers = routes.stream().filter(u -> u.dst.equals(dst)).collect(Collectors.toList());
+
         for (String gw: gateways) {
             boolean thereSameServerRoute = routes.stream().anyMatch(u -> u.dst.equals(dst) && u.gateway.equals(gw));
-            if (thereSameServerRoute)
+            Channel gatewayFound = findGateway(gatewayList, findGateway(routes, gw));
+            if (thereSameServerRoute && gatewayFound.isDstConnected) {
+                System.out.println("Уже существует путь до сервера " + dst + " чепез шлюз " + gw);
                 return;
+            }
             else {
-                Channel gatewayFound = findGateway(routes, findGateway(gatewayList, gw));
+                if (gatewayFound.isDstConnected && thereSameServers.size() == 0) {
+                    System.out.println("Добавляю маршрут до " + dst + " через " + gatewayFound.gateway);
+                    ShellExecutor.addRoute(gatewayFound.gateway, dst);
+                    addedServer = true;
+                    return;
+                }
                 for (Channel serv: thereSameServers) {
                     if (gatewayFound.isDstConnected && !serv.gateway.equals(gatewayFound.gateway)){
                         System.out.println("Удаляю маршрут до " + serv.dst + " через " + serv.gateway);
+                        ShellExecutor.removeRoute(serv);
                         System.out.println("Добавляю маршрут до " + serv.dst + " через " + gatewayFound.gateway);
+                        ShellExecutor.addRoute(gatewayFound.gateway, serv.dst);
+                        addedServer = true;
+                        return;
                     }
                 }
             }
+
         }
+        if (!addedServer)
+            System.out.println("Сервер " + dst + " не был добавлен, так как все шлюзы недоступны");
     }
 
 
@@ -96,17 +113,17 @@ public class Server {
     }
 
 
-    public static Channel findGateway (List<Channel> routes, Channel gateway) {
-        for (Channel chan: routes) {
-            if (chan.gateway.equals(gateway.gateway) && chan.dst.equals(gateway.gateway)) ;
-            return chan;
+    public static Channel findGateway (List<Channel> gateways, Channel route) {
+        for (Channel chan: gateways) {
+            if (chan.gateway.equals(route.gateway) && chan.dst.equals(route.dst))
+                return chan;
         }
         return null;
     }
     public static Channel findGateway (List<Channel> routes, String gateway) {
         for (Channel chan: routes) {
-            if (chan.gateway.equals(gateway)) ;
-            return chan;
+            if (chan.gateway.equals(gateway))
+                return chan;
         }
         return null;
     }

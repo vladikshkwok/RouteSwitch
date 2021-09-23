@@ -37,7 +37,7 @@ public class ShellExecutor {
 //        process = run.exec(cmd);
 //        process.waitFor();
         try {
-            properties.load(new FileInputStream("/home/vshkarubov/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
+            properties.load(new FileInputStream("/home/vladikshk/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
             String[] cmd = {"/bin/bash","-c","echo " + properties.getProperty("password") + "| sudo -S ip route add " + dst + " via " + gateway};
             process = run.exec(cmd);
             try {
@@ -57,7 +57,7 @@ public class ShellExecutor {
 
     public static void removeRoute(Channel route)  {
         try {
-            properties.load(new FileInputStream("/home/vshkarubov/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
+            properties.load(new FileInputStream("/home/vladikshk/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
             String[] cmd = {"/bin/bash","-c","echo " + properties.getProperty("password") + "| sudo -S ip route delete " + route.dst + " via " + route.gateway};
             process = run.exec(cmd);
             if (process.waitFor() == 0) {
@@ -69,6 +69,7 @@ public class ShellExecutor {
             e.printStackTrace();
         }
     }
+
 
     public static boolean isReachable(String ipAddr){
         cmd = "ping -n -c 1 " + ipAddr;
