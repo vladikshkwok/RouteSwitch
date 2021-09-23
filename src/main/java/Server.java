@@ -63,20 +63,18 @@ public class Server {
 //    }
 
 
-    public void  setRouteToServer(List<Channel> routes) {
+    public void  setRouteToServer(List<Channel> routes, List<Channel> gatewayList) {
         List<Channel> thereSameServers = routes.stream().filter(u -> u.dst.equals(dst)).collect(Collectors.toList());
         for (String gw: gateways) {
             boolean thereSameServerRoute = routes.stream().anyMatch(u -> u.dst.equals(dst) && u.gateway.equals(gw));
             if (thereSameServerRoute)
                 return;
             else {
-                if () //vladik gay)
+                Channel gatewayFound = findGateway(routes, findGateway(gatewayList, gw));
                 for (Channel serv: thereSameServers) {
-
-                }
-                for (Channel route: routes) {
-                    if (gw.equals(route.gateway) && route.isDstConnected && !route.dst.equals(dst)) {
-
+                    if (gatewayFound.isDstConnected && !serv.gateway.equals(gatewayFound.gateway)){
+                        System.out.println("Удаляю маршрут до " + serv.dst + " через " + serv.gateway);
+                        System.out.println("Добавляю маршрут до " + serv.dst + " через " + gatewayFound.gateway);
                     }
                 }
             }
@@ -98,7 +96,14 @@ public class Server {
     }
 
 
-    public static Channel findGateway (ArrayList<Channel> routes, String gateway) {
+    public static Channel findGateway (List<Channel> routes, Channel gateway) {
+        for (Channel chan: routes) {
+            if (chan.gateway.equals(gateway.gateway) && chan.dst.equals(gateway.gateway)) ;
+            return chan;
+        }
+        return null;
+    }
+    public static Channel findGateway (List<Channel> routes, String gateway) {
         for (Channel chan: routes) {
             if (chan.gateway.equals(gateway)) ;
             return chan;
