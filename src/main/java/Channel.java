@@ -32,6 +32,7 @@ public class Channel {
         return channels;
     }
 
+//    test
     // Получение списка каналов из JSON-строки
     public static ArrayList<Channel> getChannelsFromJSON (String jsonString) {
         gson = new Gson();
