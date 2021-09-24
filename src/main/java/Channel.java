@@ -13,14 +13,12 @@ import java.util.Scanner;
 
 public class Channel {
     private static Gson gson;
-    String gateway;
-    String dst;
+    String gateway;     // шлюз
+    String dst;         // куда настроен маршрут
     boolean isGwConnected;
     boolean isDstConnected;
 
-    public Channel () {
-    }
-
+    // Получение списка каналов из JSON-файла
     public static ArrayList<Channel> getChannelsFromJSON (File file) {
         ArrayList<Channel> channels = new ArrayList<>();
         gson = new Gson();
@@ -33,11 +31,14 @@ public class Channel {
 
         return channels;
     }
+
+    // Получение списка каналов из JSON-строки
     public static ArrayList<Channel> getChannelsFromJSON (String jsonString) {
         gson = new Gson();
         ArrayList<Channel> channels = new ArrayList<>();
         Channel [] objects = gson.fromJson(jsonString, Channel[].class);
         for (Channel channel: objects) {
+            // отсеиваю такие маршруты как default, null и другие.
             if (channel.gateway != null && !channel.gateway.matches("[a-zA-Z]+") && channel.dst != null && !channel.dst.matches("[a-zA-Z]+")) {
                 channels.add(channel);
             }
@@ -45,22 +46,7 @@ public class Channel {
         return channels;
     }
 
-    public static void checkRouteConnection (ArrayList<Channel> channels) {
-
-        for (Channel channel: channels) {
-            System.out.println(LocalDateTime.now() + " Checking ip addr: " + channel.gateway);
-            if (ShellExecutor.isReachable(channel.gateway)) {
-                channel.isGwConnected = true;
-                System.out.println(LocalDateTime.now() + " Checking ip addr: " + channel.dst + " through " + channel.gateway);
-                channel.isDstConnected = ShellExecutor.isReachable(channel.dst);
-            } else {
-                channel.isGwConnected = false;
-            }
-        }
-
-
-    }
-
+    // Проверка корректности маршрутов каналов связи
     public static void CheckRoutes (ArrayList<Channel> channels, ArrayList<Channel> routes) {
         for (Channel channel: channels) {
             boolean routeIsCorrect = false;
@@ -77,7 +63,26 @@ public class Channel {
         }
     }
 
+    // Проверка доступности шлюза и пункта назначения маршрута у канала связи
+    public static void checkRouteConnection (ArrayList<Channel> channels, ArrayList<Channel> routes) {
 
+        for (Channel channel: channels) {
+            System.out.println(LocalDateTime.now() + " Checking ip addr: " + channel.gateway);
+            if (ShellExecutor.isReachable(channel.gateway)) {
+                channel.isGwConnected = true;
+                System.out.println(LocalDateTime.now() + " Checking ip addr: " + channel.dst + " through " + channel.gateway);
+                channel.isDstConnected = ShellExecutor.isReachable(channel.dst);
+                Server.findGateway(routes, channel).isGwConnected = true;
+                Server.findGateway(routes, channel).isDstConnected = true;
+            } else {
+                channel.isGwConnected = false;
+            }
+        }
+
+
+    }
+
+    // Конвертация каналов в JSON файл
     public static void convertToJSON(Object obj, String src) {
         gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(src)){

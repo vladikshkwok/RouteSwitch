@@ -1,36 +1,36 @@
 [
   {
-    "gateway": "192.168.1.1",
+    "gateway": "192.168.0.3",
     "dst": "8.8.4.4",
-    "isGwConnected": false,
-    "isDstConnected": false
+    "isGwConnected": true,
+    "isDstConnected": true
   },
   {
-    "gateway": "192.168.1.2",
+    "gateway": "192.168.0.2",
     "dst": "8.8.8.8",
-    "isGwConnected": false,
-    "isDstConnected": false
+    "isGwConnected": true,
+    "isDstConnected": true
   },
   {
-    "gateway": "192.168.1.3",
+    "gateway": "192.168.0.1",
     "dst": "77.88.8.8",
-    "isGwConnected": false,
-    "isDstConnected": false
+    "isGwConnected": true,
+    "isDstConnected": true
   },
   {
-    "gateway": "192.168.1.2",
+    "gateway": "192.168.0.2",
     "dst": "91.203.37.18",
     "isGwConnected": false,
     "isDstConnected": false
   },
   {
-    "gateway": "192.168.1.3",
+    "gateway": "192.168.0.2",
     "dst": "91.203.37.19",
     "isGwConnected": false,
     "isDstConnected": false
   },
   {
-    "gateway": "192.168.1.1",
+    "gateway": "192.168.0.1",
     "dst": "91.203.37.20",
     "isGwConnected": false,
     "isDstConnected": false

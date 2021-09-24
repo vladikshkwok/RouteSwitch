@@ -34,82 +34,45 @@ public class Server {
         return channels;
     }
 
-//    public void  setRouteToServer(ArrayList<Channel> routes) {
-//        for (String gw: gateways) {
-//            for (Channel route : routes) {
-//                if (gw.equals(route.gateway) && route.isDstConnected) {
-//                    List<Channel> thereSameServers = routes.stream().filter(u -> u.dst.equals(dst)).collect(Collectors.toList());
-//                    if (thereSameServers.size() > 0) {
-//                        for (Channel serv: thereSameServers) {
-//                            if (gw.equals(serv.gateway)) {
-//                                System.out.println("Сервер " + serv.dst + " через шлюз " + serv.gateway + " уже есть, не удаляю");
-//                                return;
-//                            }
-//                            else {
-//                                System.out.println("Удаляю сервер " + serv.dst + ", прописанный через шлюз " + serv.gateway);
-//                                return;
-//                            }
-//                        }
-//                    } else {
-//                        System.out.println("Создаю роут до сервера " + dst + " через шлюз " + gw);
-//                        return;
-//                    }
-//                } else {
-//                    System.out.println("Skip " + dst + " through " + gw);
-//                }
-//            }
-//        }
-//
-//    }
-
 
     public void  setRouteToServer(List<Channel> routes, List<Channel> gatewayList) {
-        boolean addedServer = false;
+        // Лист из маршрутов до такого же сервера
         List<Channel> thereSameServers = routes.stream().filter(u -> u.dst.equals(dst)).collect(Collectors.toList());
 
+        //  цикл последовательно проходящий по каждому шлюзу из списка объекта
         for (String gw: gateways) {
+            // Переменная хранящая значение - есть ли уже маршрут до сервера через этот шлюз
             boolean thereSameServerRoute = routes.stream().anyMatch(u -> u.dst.equals(dst) && u.gateway.equals(gw));
+            // метод поиска шлюза
             Channel gatewayFound = findGateway(gatewayList, findGateway(routes, gw));
+            // если маршрут существует да и к тому же шлюз все еще работает - оставить все как есть
             if (thereSameServerRoute && gatewayFound.isDstConnected) {
                 System.out.println("Уже существует путь до сервера " + dst + " чепез шлюз " + gw);
                 return;
             }
             else {
+                // если шлюз работает, а маршрута до сервера нет - создать его
                 if (gatewayFound.isDstConnected && thereSameServers.size() == 0) {
                     System.out.println("Добавляю маршрут до " + dst + " через " + gatewayFound.gateway);
                     ShellExecutor.addRoute(gatewayFound.gateway, dst);
-                    addedServer = true;
                     return;
                 }
+                // проходим по циклу маршрутов до такого же сервера
                 for (Channel serv: thereSameServers) {
+                    // если шлюз работает, а у сервера сейчас стоит другой шлюз (менее приоритетный) поставить этот шлюз
                     if (gatewayFound.isDstConnected && !serv.gateway.equals(gatewayFound.gateway)){
                         System.out.println("Удаляю маршрут до " + serv.dst + " через " + serv.gateway);
                         ShellExecutor.removeRoute(serv);
                         System.out.println("Добавляю маршрут до " + serv.dst + " через " + gatewayFound.gateway);
                         ShellExecutor.addRoute(gatewayFound.gateway, serv.dst);
-                        addedServer = true;
                         return;
                     }
                 }
             }
 
         }
-        if (!addedServer)
-            System.out.println("Сервер " + dst + " не был добавлен, так как все шлюзы недоступны");
-    }
-
-
-
-
-    @Override
-    public String toString() {
-        StringBuilder gatewayString = new StringBuilder();
-        for (String gateway: gateways)
-            gatewayString.append("gateway: '").append(gateway).append(", ");
-        gatewayString.append("\b\b");
-        return "Server{" +
-                "dst='" + dst + ", '" +
-                gatewayString + "}";
+        // если мы сюда дошли, то в данный момент нет работающих шлюзов
+        System.out.println("Сервер " + dst + " не был добавлен, так как все шлюзы недоступны");
     }
 
 
@@ -120,11 +83,23 @@ public class Server {
         }
         return null;
     }
+
     public static Channel findGateway (List<Channel> routes, String gateway) {
         for (Channel chan: routes) {
             if (chan.gateway.equals(gateway))
                 return chan;
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder gatewayString = new StringBuilder();
+        for (String gateway: gateways)
+            gatewayString.append("gateway: '").append(gateway).append(", ");
+        gatewayString.append("\b\b");
+        return "Server{" +
+                "dst='" + dst + ", '" +
+                gatewayString + "}";
     }
 }
