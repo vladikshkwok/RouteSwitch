@@ -12,15 +12,26 @@ public class ShellExecutor {
     private static final Properties properties = new Properties();
 
 
+    public ShellExecutor () {
+        try {
+            properties.load(new FileInputStream("/home/ts/routeSwitch/config/config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Получение списка маршрутов
     public static String getRoutesFromShell(){
-        cmd = "ip -j route";
-
+        // cmd = "ip -j route";
+        cmd = "/home/ts/routeSwitch/lib/routejson.sh";
+        System.out.println(cmd);
         try {
             process = run.exec(cmd);
             process.waitFor();
             return new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -35,8 +46,7 @@ public class ShellExecutor {
 
     public static void addRoute(String gateway, String dst) {
         try {
-            properties.load(new FileInputStream("/home/vshkarubov/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
-            String[] cmd = {"/bin/bash","-c","echo " + properties.getProperty("password") + "| sudo -S ip route add " + dst + " via " + gateway};
+            cmd = "ip route add " + dst + " via " + gateway;
             process = run.exec(cmd);
             try {
                 if (process.waitFor() == 0) {
@@ -52,18 +62,28 @@ public class ShellExecutor {
         }
     }
 
+
+
     // Удаление маршрута
     public static void removeRoute(Channel route)  {
+        removeRoute(route.gateway, route.dst);
+    }
+
+
+    public static void removeRoute(String gateway, String dst) {
         try {
-            properties.load(new FileInputStream("/home/vshkarubov/IdeaProjects/RouteSwitch/src/main/resources/config.properties"));
-            String[] cmd = {"/bin/bash","-c","echo " + properties.getProperty("password") + "| sudo -S ip route delete " + route.dst + " via " + route.gateway};
+            cmd = "ip route delete " + dst + " via " + gateway;
             process = run.exec(cmd);
-            if (process.waitFor() == 0) {
-                System.out.println(LocalDateTime.now() + " Remove route to " + route.dst + " via " + route.gateway + " SUCCESSFUL");
-            } else {
-                System.out.println(LocalDateTime.now() + " Remove route to " + route.dst + " via " + route.gateway + " FAILED");
+            try {
+                if (process.waitFor() == 0) {
+                    System.out.println(LocalDateTime.now() + " Remove route to " + dst + " via " + gateway + " SUCCESSFUL");
+                } else {
+                    System.out.println(LocalDateTime.now() + " Remove route to " + dst + " via " + gateway + " FAILED");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -72,8 +72,16 @@ public class Channel {
                 channel.isGwConnected = true;
                 System.out.println(LocalDateTime.now() + " Checking ip addr: " + channel.dst + " through " + channel.gateway);
                 channel.isDstConnected = ShellExecutor.isReachable(channel.dst);
-                Server.findGateway(routes, channel).isGwConnected = true;
-                Server.findGateway(routes, channel).isDstConnected = true;
+                System.out.println("dst: " + channel.dst + " = " + channel.isDstConnected);
+                Channel route = Server.findGateway(routes, channel);
+
+                if (route == null) {
+                    System.out.println("gg wp");
+                    return;
+                }
+                System.out.println("Route to " + route.dst + " via " + route.gateway + " founded");
+                route.isGwConnected = true;
+                route.isDstConnected = channel.isDstConnected;
             } else {
                 channel.isGwConnected = false;
             }
