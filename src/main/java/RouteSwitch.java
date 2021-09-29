@@ -1,5 +1,4 @@
 import java.io.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -7,57 +6,77 @@ public class RouteSwitch {
 
     private static final Properties properties = new Properties();
 
-    public static void run () {
+    public static void run() {
+        String serverJSON, channelJSON, routesJSON;
+        FileInputStream fis;
+        File file;
+
         try {
-            properties.load(new FileInputStream("config/config.properties"));
+            fis = new FileInputStream("config/routeSwitch.config");
+            properties.load(fis);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            Log.log(Log.severity.err, e.getLocalizedMessage());
+            return;
         }
-        String serverJSON, channelJSON, routesJSON, logFile;
-        PrintStream o = null;
-        try {
-            logFile = properties.getProperty("logFile");
-            o = new PrintStream(logFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        PrintStream o;
+        String logFile = properties.getProperty("logFile");
+        if (!(logFile == null || logFile.equalsIgnoreCase("debug"))) {
+            try {
+                o = new PrintStream(new FileOutputStream(logFile, true));
+                System.setOut(o);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        PrintStream console = System.out;
-        System.setOut(o);
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] RouteSwitch ЗАПУЩЕН");
+        Log.log("[RouteSwitch.run] RouteSwitch ЗАПУЩЕН");
         serverJSON = properties.getProperty("serverJSONPath");
-        if (serverJSON.equals("default")) {
+        if (serverJSON == null) {
+            Log.log(Log.severity.err, "[RouteSwitch.run] не найден параметр serverJSONPath. стандартный = config/servers.json");
             serverJSON = "config/servers.json";
         }
 
         channelJSON = properties.getProperty("channelJSONPath");
-        if (channelJSON.equals("default")) {
+        if (channelJSON == null) {
+            Log.log(Log.severity.err, "[RouteSwitch.run] не найден параметр serverJSONPath. стандартный = config/channels.json");
             channelJSON = "config/channels.json";
         }
 
-        routesJSON = properties.getProperty("routesJSONPath");
-        if (routesJSON.equals("default")) {
-            routesJSON = "log/routesINFO.json";
+//        routesJSON = properties.getProperty("routesJSONPath");
+//        if (routesJSON.equals("default")) {
+//            routesJSON = "log/routesINFO.json";
+//        }
+
+        Log.log("[RouteSwitch.run] Получаю список каналов связи из channels.JSON");
+        file = new File(channelJSON);
+        if (!file.exists()) {
+            Log.log(Log.severity.err, "[RouteSwitch.run] не найден файл " + channelJSON);
+            return;
         }
-
-
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Получаю список каналов связи из channels.JSON");
         // Каналы связи и узел для проверки, записанные техником в channels.json
-        ArrayList<Channel> channels = Channel.getChannelsFromJSON(new File(channelJSON));
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Получаю список серверов со шлюзами из servers.JSON");
+        ArrayList<Channel> channels = Channel.getChannelsFromJSON(file);
+
+        file = new File(serverJSON);
+        if (!file.exists()) {
+            Log.log(Log.severity.err, "[RouteSwitch.run] не найден файл " + serverJSON);
+            return;
+        }
+        Log.log("[RouteSwitch.run] Получаю список серверов со шлюзами из servers.JSON");
         // Корп.сервера со шлюзами, записанными в приоритетном порядке (наверное сотрудниками тех.поддержки)
         ArrayList<Server> servers = Server.getServersFromJSON(new File(serverJSON));
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Получаю список текущих маршрутов в системе");
+
+        Log.log("[RouteSwitch.run] Получаю список текущих маршрутов в системе");
         // получение списка маршрутов заданных в данный момент на устройстве
         ArrayList<Channel> routes = Channel.getChannelsFromJSON(ShellExecutor.getRoutesFromShell());
 
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Проверяю доступность шлюзов и строю маршруты для проверки шлюзов");
+        Log.log("[RouteSwitch.run] Проверяю доступность шлюзов и строю маршруты для проверки шлюзов");
         // для каждого канала(указанного техником) проверяется существует ли маршрут, и правильный ли он(если неправильный то удаляется), если не найден маршрут то создается новый.
         Channel.CheckRoutes(channels, routes);
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Проверяю доступность маршрута");
+        Log.log("[RouteSwitch.run] Проверяю доступность маршрутов");
         // Проверить, пингуется ли шлюз, если пингуется то пингануть узел для проверки шлюза
         Channel.checkRouteConnection(channels, routes);
 
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] Строю маршруты до серверов");
+        Log.log("[RouteSwitch.run] Строю маршруты до серверов");
         // Для каждого сервера создать свой маршрут (с наиболее предпочтительным шлюзом)
         for (Server server : servers) {
             server.setRouteToServer(routes, channels);
@@ -65,7 +84,7 @@ public class RouteSwitch {
 
         // сохранение полученных маршрутов в json (не знаю пока правда зачем это пригодится, если все равно по сути проверять лучше каждый раз, маршруты)
         // Channel.convertToJSON(routes, routesJSON);
-        System.out.println(LocalDateTime.now() + " [RouteSwitch.run] RouteSwitch ЗАВЕРШИЛ СВОЮ РАБОТУ");
+        Log.log("[RouteSwitch.run] RouteSwitch ЗАВЕРШИЛ СВОЮ РАБОТУ");
     }
 
 }

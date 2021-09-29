@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2021-09-29T14:39:09</date>
+  <millis>1632915549654</millis>
+  <sequence>0</sequence>
+  <logger>com.wombat.nose</logger>
+  <level>INFO</level>
+  <class>com.wombat.Nose</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>doing stuff</message>
+</record>
+<record>
+  <date>2021-09-29T14:39:09</date>
+  <millis>1632915549678</millis>
+  <sequence>1</sequence>
+  <logger>com.wombat.nose</logger>
+  <level>SEVERE</level>
+  <class>com.wombat.Nose</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Пиздос</message>
+</record>
+<record>
+  <date>2021-09-29T14:39:09</date>
+  <millis>1632915549681</millis>
+  <sequence>2</sequence>
+  <logger>com.wombat.nose</logger>
+  <level>FINE</level>
+  <class>com.wombat.Nose</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>done</message>
+</record>
+</log>

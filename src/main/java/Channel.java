@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
@@ -19,8 +18,8 @@ public class Channel {
     boolean isDstConnected;
 
     // Получение списка каналов из JSON-файла
-    public static ArrayList<Channel> getChannelsFromJSON (File file) {
-        System.out.println(LocalDateTime.now() + " [getChannelsFromJSON] Получение списка каналов из " + file);
+    public static ArrayList<Channel> getChannelsFromJSON(File file) {
+        Log.log("[getChannelsFromJSON] Получение списка каналов из " + file);
         ArrayList<Channel> channels = new ArrayList<>();
         gson = new Gson();
         try {
@@ -33,15 +32,15 @@ public class Channel {
     }
 
     // Получение списка каналов из JSON-строки
-    public static ArrayList<Channel> getChannelsFromJSON (String jsonString) {
+    public static ArrayList<Channel> getChannelsFromJSON(String jsonString) {
         gson = new Gson();
-        System.out.println(LocalDateTime.now() + " [getChannelsFromJSON] Получение списка каналов из " + jsonString);
+        Log.log("[getChannelsFromJSON] Получение списка каналов из " + jsonString);
         ArrayList<Channel> channels = new ArrayList<>();
-        Channel [] objects = gson.fromJson(jsonString, Channel[].class);
-        for (Channel channel: objects) {
+        Channel[] objects = gson.fromJson(jsonString, Channel[].class);
+        for (Channel channel : objects) {
             // отсеиваю такие маршруты как default, null и другие.
             if (channel.gateway != null && !channel.gateway.matches("[a-zA-Z]+") && channel.dst != null && !channel.dst.matches("[a-zA-Z]+")) {
-                System.out.println(LocalDateTime.now() + " [getChannelsFromJSON] Добавлен канал " + channel + " в объект списка каналов");
+                Log.log("[getChannelsFromJSON] Добавлен канал " + channel + " в объект списка каналов");
                 channels.add(channel);
             }
         }
@@ -49,38 +48,38 @@ public class Channel {
     }
 
     // Проверка корректности маршрутов каналов связи
-    public static void CheckRoutes (ArrayList<Channel> channels, ArrayList<Channel> routes) {
-        System.out.println(LocalDateTime.now() + " [CheckRoutes] Сравнение настроенных каналов связи с списком маршрутов");
-        for (Channel channel: channels) {
+    public static void CheckRoutes(ArrayList<Channel> channels, ArrayList<Channel> routes) {
+        Log.log("[CheckRoutes] Сравнение настроенных каналов связи с списком маршрутов");
+        for (Channel channel : channels) {
             boolean routeIsCorrect = false;
             for (Channel route : routes) {
                 if (Objects.equals(route.dst, channel.dst) && Objects.equals(route.gateway, channel.gateway)) {
-                    System.out.println(LocalDateTime.now() + " [CheckRoutes] Канал " + channel + " совпадает с уже построенным маршрутом " + route);
+                    Log.log("[CheckRoutes] Канал " + channel + " совпадает с уже построенным маршрутом " + route);
                     routeIsCorrect = true;
                 } else if (Objects.equals(route.dst, channel.dst) && !Objects.equals(route.gateway, channel.gateway)) {
-                    System.out.println(LocalDateTime.now() + " [CheckRoutes] До " + channel.dst + " найден другой маршрут через " + route.gateway);
+                    Log.log("[CheckRoutes] До " + channel.dst + " найден другой маршрут через " + route.gateway);
                     ShellExecutor.removeRoute(route);
+                    ShellExecutor.addRoute(channel);
                 }
             }
             if (!routeIsCorrect) {
-                System.out.println(LocalDateTime.now() + " [CheckRoutes] Среди списка маршрутов не найден маршрут " + channel);
+                Log.log("[CheckRoutes] Среди списка маршрутов не найден маршрут " + channel);
                 ShellExecutor.addRoute(channel);
             }
         }
     }
 
     // Проверка доступности шлюза и пункта назначения маршрута у канала связи
-    public static void checkRouteConnection (ArrayList<Channel> channels, ArrayList<Channel> routes) {
-        for (Channel channel: channels) {
-            System.out.println(LocalDateTime.now() + " [checkRouteConnection] Проверяю ip адрес: " + channel.gateway);
+    public static void checkRouteConnection(ArrayList<Channel> channels, ArrayList<Channel> routes) {
+        for (Channel channel : channels) {
+            Log.log("[checkRouteConnection] Проверяю ip адрес: " + channel.gateway);
             if (ShellExecutor.isReachable(channel.gateway)) {
-                System.out.println(LocalDateTime.now() + " [checkRouteConnection] Шлюз " + channel.gateway + " доступен");
+                Log.log("[checkRouteConnection] Шлюз " + channel.gateway + " доступен");
                 channel.isGwConnected = true;
-                System.out.println(LocalDateTime.now() + " [checkRouteConnection] Проверяю ip адрес: " + channel.dst + " через " + channel.gateway);
+                Log.log("[checkRouteConnection] Проверяю ip адрес: " + channel.dst + " через " + channel.gateway);
                 channel.isDstConnected = ShellExecutor.isReachable(channel.dst);
-                System.out.println(LocalDateTime.now() + " [checkRouteConnection] ip адрес: " + channel.dst + " через " + channel.gateway + " = " + channel.isDstConnected);
-                Channel route = Server.findGateway(routes, channel);
-
+                Log.log("[checkRouteConnection] ip адрес: " + channel.dst + " через " + channel.gateway + " = " + channel.isDstConnected);
+//                Channel route = Server.findGateway(routes, channel);
 //                if (route == null) {
 //                    System.out.println(LocalDateTime.now() + " Маршрут " + route.dst + " via " + route.gateway + " не найден");
 //                    return;
@@ -89,7 +88,7 @@ public class Channel {
 //                route.isGwConnected = true;
 //                route.isDstConnected = channel.isDstConnected;
             } else {
-                System.out.println(LocalDateTime.now() + " [checkRouteConnection] Шлюз " + channel.gateway + " недоступен");
+                Log.log("[checkRouteConnection] Шлюз " + channel.gateway + " недоступен");
                 channel.isGwConnected = false;
             }
         }
@@ -100,9 +99,9 @@ public class Channel {
     // Конвертация каналов в JSON файл
     public static void convertToJSON(Object obj, String src) {
         gson = new GsonBuilder().setPrettyPrinting().create();
-        try (FileWriter writer = new FileWriter(src)){
+        try (FileWriter writer = new FileWriter(src)) {
             gson.toJson(obj, writer);
-            System.out.println(LocalDateTime.now() + " [convertToJSON] переданный объект " + obj + " конвертирован в JSON в " + src);
+            Log.log("[convertToJSON] переданный объект " + obj + " конвертирован в JSON в " + src);
         } catch (IOException e) {
             e.printStackTrace();
         }
