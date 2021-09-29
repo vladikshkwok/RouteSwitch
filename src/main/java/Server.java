@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Server {
     private static Gson gson;
@@ -16,6 +15,7 @@ public class Server {
 
 
     public static ArrayList<Server> getServersFromJSON(File file) {
+        System.out.println(LocalDateTime.now() + " [getServersFromJSON] Получение списка серверов из " + file);
         ArrayList<Server> channels = new ArrayList<>();
         gson = new Gson();
         try {
@@ -24,7 +24,7 @@ public class Server {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        System.out.println(channels);
         return channels;
     }
 
@@ -37,37 +37,35 @@ public class Server {
 
 
     public void setRouteToServer(List<Channel> routes, List<Channel> gatewayList) {
-        // Лист из маршрутов до такого же сервера
-        List<Channel> thereSameServers = routes.stream().filter(u -> u.dst.equals(dst)).collect(Collectors.toList());
-
         //  цикл последовательно проходящий по каждому шлюзу из списка объекта
         for (String gw : gateways) {
-            // Переменная хранящая значение - есть ли уже маршрут до сервера через этот шлюз
-            boolean thereSameServerRoute = routes.stream().anyMatch(u -> u.dst.equals(dst) && u.gateway.equals(gw));
             // метод поиска шлюза
-            //Channel gatewayFound = findGateway(gatewayList, findGateway(routes, gw));
+            System.out.println(LocalDateTime.now() + " [setRouteToServer] Поиск шлюза " + gw + " для сервера " + dst + " среди настроенных каналов в настроеном списке каналов");
             Channel gatewayFound = findGateway(gatewayList, gw);
-            System.out.println(gatewayFound);
-            if (gatewayFound.isDstConnected) {
-                Channel route = findDst(routes, dst);
-                if (route == null) {
-                    System.out.println("Нет маршрута до сервера " + dst + " через " + gw + " добавляю");
-                    ShellExecutor.addRoute(gw, dst);
-                    return;
-                }
-                System.out.println("Найден маршрут до сервера " + dst + " через " + route.gateway);
-                if (gw.equals(route.gateway)) {
-                    System.out.println("В данный момент маршрут до сервера " + dst + " через " + gw + " работает");
-                    return;
-                }
-                if (!gw.equals(route.gateway)) {
-                    System.out.println("В данный момент шлюз " + gw + "доступен и приоритетнее чем " + route.gateway + ", строю маршрут до " + dst + " через " + gw);
-                    ShellExecutor.removeRoute(route.gateway, dst);
-                    ShellExecutor.addRoute(gw, dst);
-                    return;
-                }
+            if (gatewayFound == null) {
+                System.out.println(LocalDateTime.now() + " [setRouteToServer] Шлюз " + gw + " не найден в списке настроенных каналов");
+                return;
             }
-            System.out.println(gw + " в данный момент недоступен");
+            System.out.println(gatewayFound);
+            if (!gatewayFound.isDstConnected) {
+                System.out.println(LocalDateTime.now() + " [setRouteToServer] " + gw + " в данный момент недоступен");
+                continue;
+            }
+            Channel route = findDst(routes, dst);
+            if (route == null) {
+                System.out.println(LocalDateTime.now() + " [setRouteToServer] Нет маршрута до сервера " + dst + " через " + gw + " добавляю");
+                ShellExecutor.addRoute(gw, dst);
+                return;
+            }
+            System.out.println(LocalDateTime.now() + " [setRouteToServer] Найден маршрут до сервера " + dst + " через " + route.gateway);
+            if (gw.equals(route.gateway)) {
+                System.out.println(LocalDateTime.now() + " [setRouteToServer] В данный момент маршрут до сервера " + dst + " через " + gw + " работает");
+                return;
+            }
+            System.out.println(LocalDateTime.now() + " [setRouteToServer] В данный момент шлюз " + gw + "доступен и приоритетнее чем " + route.gateway + ", строю маршрут до " + dst + " через " + gw);
+            ShellExecutor.removeRoute(route.gateway, dst);
+            ShellExecutor.addRoute(gw, dst);
+            return;
 
 
 //            // если маршрут существует да и к тому же шлюз все еще работает - оставить все как есть
@@ -97,11 +95,12 @@ public class Server {
 
         }
         // если мы сюда дошли, то в данный момент нет работающих шлюзов
-        System.out.println(LocalDateTime.now() + " Сервер " + dst + " не был добавлен, так как все шлюзы недоступны");
+        System.out.println(LocalDateTime.now() + " [setRouteToServer] Сервер " + dst + " не был добавлен, так как все шлюзы недоступны");
     }
 
 
     public static Channel findGateway(List<Channel> gateways, Channel route) {
+        System.out.println(LocalDateTime.now() + " [findGateway] Поиск шлюза " + route.gateway + " в списке " + gateways);
         for (Channel chan : gateways) {
             if (chan.gateway.equals(route.gateway) && chan.dst.equals(route.dst))
                 return chan;
@@ -110,6 +109,7 @@ public class Server {
     }
 
     public static Channel findGateway(List<Channel> routes, String node) {
+        System.out.println(LocalDateTime.now() + " [findGateway] Поиск шлюза " + node + " в списке " + routes);
         for (Channel chan : routes) {
             if (chan.gateway.equals(node))
                 return chan;
@@ -117,6 +117,7 @@ public class Server {
         return null;
     }
     public static Channel findDst(List<Channel> routes, String node) {
+        System.out.println(LocalDateTime.now() + " [findDst] Поиск cервера " + node + " в списке " + routes);
         for (Channel chan : routes) {
             if (chan.dst.equals(node))
                 return chan;
