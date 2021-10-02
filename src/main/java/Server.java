@@ -24,7 +24,6 @@ public class Server {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println(channels);
         return channels;
     }
 
@@ -47,7 +46,7 @@ public class Server {
                 return;
             }
             if (!gatewayFound.isDstConnected) {
-                Log.log("[setRouteToServer] " + gw + " в данный момент недоступен");
+                Log.log("[setRouteToServer] Маршрут через " + gw + " в данный момент недоступен");
                 continue;
             }
             Channel route = findDst(routes, dst);
@@ -61,7 +60,7 @@ public class Server {
                 Log.log("[setRouteToServer] В данный момент маршрут до сервера " + dst + " через " + gw + " работает");
                 return;
             }
-            Log.log("[setRouteToServer] В данный момент шлюз " + gw + "доступен и приоритетнее чем " + route.gateway + ", строю маршрут до " + dst + " через " + gw);
+            Log.log("[setRouteToServer] В данный момент шлюз " + gw + " доступен и приоритетнее чем " + route.gateway + ", строю маршрут до " + dst + " через " + gw);
             ShellExecutor.removeRoute(route.gateway, dst);
             ShellExecutor.addRoute(gw, dst);
             return;
@@ -99,7 +98,7 @@ public class Server {
 
 
     public static Channel findGateway(List<Channel> gateways, Channel route) {
-        Log.log("[findGateway] Поиск шлюза " + route.gateway + " в списке " + gateways);
+        Log.log("[findGateway] Поиск шлюза " + route.gateway + " в списке проверенных шлюзов");
         for (Channel chan : gateways) {
             if (chan.gateway.equals(route.gateway) && chan.dst.equals(route.dst))
                 return chan;
@@ -108,7 +107,7 @@ public class Server {
     }
 
     public static Channel findGateway(List<Channel> routes, String node) {
-        Log.log("[findGateway] Поиск шлюза " + node + " в списке " + routes);
+        Log.log("[findGateway] Поиск шлюза " + node + " в списке проверенных шлюзов");
         for (Channel chan : routes) {
             if (chan.gateway.equals(node))
                 return chan;
@@ -117,7 +116,7 @@ public class Server {
     }
 
     public static Channel findDst(List<Channel> routes, String node) {
-        Log.log("[findDst] Поиск cервера " + node + " в списке " + routes);
+        Log.log("[findDst] Поиск cервера " + node + " в списке проверенных маршрутов");
         for (Channel chan : routes) {
             if (chan.dst.equals(node))
                 return chan;

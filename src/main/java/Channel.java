@@ -34,7 +34,7 @@ public class Channel {
     // Получение списка каналов из JSON-строки
     public static ArrayList<Channel> getChannelsFromJSON(String jsonString) {
         gson = new Gson();
-        Log.log("[getChannelsFromJSON] Получение списка каналов из " + jsonString);
+        Log.log("[getChannelsFromJSON] Получение списка каналов из JSON");
         ArrayList<Channel> channels = new ArrayList<>();
         Channel[] objects = gson.fromJson(jsonString, Channel[].class);
         for (Channel channel : objects) {

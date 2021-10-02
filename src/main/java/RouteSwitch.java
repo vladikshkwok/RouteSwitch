@@ -63,7 +63,7 @@ public class RouteSwitch {
         }
         Log.log("[RouteSwitch.run] Получаю список серверов со шлюзами из servers.JSON");
         // Корп.сервера со шлюзами, записанными в приоритетном порядке (наверное сотрудниками тех.поддержки)
-        ArrayList<Server> servers = Server.getServersFromJSON(new File(serverJSON));
+        ArrayList<Server> servers = Server.getServersFromJSON(file);
 
         Log.log("[RouteSwitch.run] Получаю список текущих маршрутов в системе");
         // получение списка маршрутов заданных в данный момент на устройстве
