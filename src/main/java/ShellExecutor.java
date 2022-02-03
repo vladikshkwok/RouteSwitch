@@ -1,10 +1,11 @@
 import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.regex.Matcher;
 
 
 public class ShellExecutor {
@@ -97,10 +98,47 @@ public class ShellExecutor {
 
     // Проверка доступности (Да, через shell, что поделать)
     public static boolean isReachable(String ipAddr) {
+        File routesJSON = new File("routesINFO.json");
         cmd = "ping -n -c 1 " + ipAddr;
         try {
             process = run.exec(cmd);
-            return (process.waitFor() == 0);
+            InputStream stdIn = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(stdIn);
+            BufferedReader br = new BufferedReader(isr);
+            String outExec;
+            String resLine = "";
+            while ((outExec = br.readLine()) != null) {
+                Log.log("[isReachable] Result for ping " + ipAddr + " is: " + outExec);
+                if (outExec.matches("[0-9]+ packets.*"))
+                    resLine=outExec;
+            }
+            boolean ecexCode = process.waitFor() == 0;
+            if (routesJSON.exists()) {
+                ArrayList<Server> servers = Server.getServersFromJSON(routesJSON);
+                for (Server server : servers) {
+                    File serverGwPingDir = new File("log/route_log_for_"+server.dst);
+
+                    if (!serverGwPingDir.exists()) {
+                        serverGwPingDir.mkdir();
+                    }
+                    for (int i=0; i < server.channels_info.size(); i++) {
+                        if (ipAddr.equals(server.channels_info.get(i).gateway)) {
+                            Log.log("[isReachable] Gateway " + (int) (i + 1) +
+                                    "_" + server.channels_info.get(i).gateway + " for server " +
+                                    server.dst + " was active: " +
+                                    server.channels_info.get(i).isGwConnected);
+                            PrintStream pingLog = new PrintStream(
+                                    new FileOutputStream(
+                                            "log/route_log_for_" + server.dst +
+                                                    "/channel" + (int) (i + 1) + "." + server.channels_info.get(i).gateway,
+                                            true));
+                            if (server.channels_info.get(i).isGwConnected != ecexCode)
+                                pingLog.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + resLine);
+                        }
+                    }
+                }
+            }
+            return ecexCode;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

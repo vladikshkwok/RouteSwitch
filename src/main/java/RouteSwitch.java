@@ -42,10 +42,7 @@ public class RouteSwitch {
             channelJSON = "config/channels.json";
         }
 
-//        routesJSON = properties.getProperty("routesJSONPath");
-//        if (routesJSON.equals("default")) {
-//            routesJSON = "log/routesINFO.json";
-//        }
+        routesJSON = "routesINFO.json";
 
         Log.log("[RouteSwitch.run] Получаю список каналов связи из channels.JSON");
         file = new File(channelJSON);
@@ -83,7 +80,7 @@ public class RouteSwitch {
         }
 
         // сохранение полученных маршрутов в json (не знаю пока правда зачем это пригодится, если все равно по сути проверять лучше каждый раз, маршруты)
-        // Channel.convertToJSON(routes, routesJSON);
+        Channel.convertToJSON(servers, routesJSON);
         Log.log("[RouteSwitch.run] RouteSwitch ЗАВЕРШИЛ СВОЮ РАБОТУ");
     }
 

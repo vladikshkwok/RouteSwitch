@@ -12,6 +12,7 @@ public class Server {
     private static Gson gson;
     String dst;
     String[] gateways;
+    ArrayList<Channel> channels_info;
 
 
     public static ArrayList<Server> getServersFromJSON(File file) {
@@ -36,6 +37,12 @@ public class Server {
 
 
     public void setRouteToServer(List<Channel> routes, List<Channel> gatewayList) {
+        channels_info = new ArrayList<>();
+        for (String gw : gateways) {
+            Channel gatewayFound = findGateway(gatewayList, gw);
+            if (gatewayFound != null)
+                channels_info.add(gatewayFound);
+        }
         //  цикл последовательно проходящий по каждому шлюзу из списка объекта
         for (String gw : gateways) {
             // метод поиска шлюза
