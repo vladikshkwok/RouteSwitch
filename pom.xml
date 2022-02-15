@@ -6,7 +6,7 @@
 
     <groupId>ru.vladikshk</groupId>
     <artifactId>RouteSwitch</artifactId>
-    <version>1.0-TEST</version>
+    <version>1.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

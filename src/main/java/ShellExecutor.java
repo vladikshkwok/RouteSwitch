@@ -132,7 +132,9 @@ public class ShellExecutor {
                                             "log/route_log_for_" + server.dst +
                                                     "/channel" + (int) (i + 1) + "." + server.channels_info.get(i).gateway,
                                             true));
-                            if (server.channels_info.get(i).isGwConnected != ecexCode) {
+                            if (server.channels_info.get(i).isGwConnected != ecexCode ||
+                                    new File("log/route_log_for_" + server.dst + "/channel" +
+                                            (int) (i + 1) + "." + server.channels_info.get(i).gateway).length() == 0) {
                                 Process change_executability;
                                 if (ecexCode)
                                     change_executability = run.exec("chmod +x log/route_log_for_" + server.dst +

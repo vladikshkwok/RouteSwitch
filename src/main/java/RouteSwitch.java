@@ -80,7 +80,11 @@ public class RouteSwitch {
         }
 
         // сохранение полученных маршрутов в json (не знаю пока правда зачем это пригодится, если все равно по сути проверять лучше каждый раз, маршруты)
-        Channel.convertToJSON(servers, routesJSON);
+        if (!new File(routesJSON).exists()) {
+            Channel.convertToJSON(servers, routesJSON);
+            Channel.checkRouteConnection(channels, routes);
+        } else
+            Channel.convertToJSON(servers, routesJSON);
         Log.log("[RouteSwitch.run] RouteSwitch ЗАВЕРШИЛ СВОЮ РАБОТУ");
     }
 
