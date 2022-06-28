@@ -22,6 +22,7 @@ public class Server {
         try {
             String jsonString = new Scanner(file).useDelimiter("\\Z").next();
             Collections.addAll(channels, gson.fromJson(jsonString, Server[].class));
+            Log.log("Полученный список серверов: " + channels);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

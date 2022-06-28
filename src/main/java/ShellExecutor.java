@@ -4,8 +4,10 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 
 
 public class ShellExecutor {
@@ -115,7 +117,37 @@ public class ShellExecutor {
             boolean ecexCode = process.waitFor() == 0;
             if (routesJSON.exists()) {
                 ArrayList<Server> servers = Server.getServersFromJSON(routesJSON);
+                File directoryLog = new File("log/");
+                FileFilter filter = new RegexFileFilter("route_log_for_.*");
+                File[] logFiles = directoryLog.listFiles(filter);
+                try {
+                    Log.log("Получен список директорий с пингами маршрутов до серверов: " + Arrays.toString(logFiles));
+                    for (File logFile : logFiles) {
+                        boolean serverExist = false;
+                        for (Server server : servers) {
+                            String dirName = logFile.getName();
+                            Log.log("Directory name to compare with server: " + dirName);
+                            serverExist = dirName.matches("route_log_for.*" + server.dst + ".*");
+                            Log.log("route_log_for_" + server.dst + " == " + logFile.getName() + " ???:  " + serverExist);
+                        }
+                        if (!serverExist) {
+                            Log.log("Удаляю " + logFile.getName() + " потому что тот не прописан в списке серверов.");
+                            Process rmHelplessLog = run.exec("rm -rv " + logFile.getAbsolutePath());
+                            InputStream inS = rmHelplessLog.getInputStream();
+                            InputStreamReader iSR = new InputStreamReader(inS);
+                            BufferedReader breader = new BufferedReader(iSR);
+
+                            String exec_out;
+                            while ((exec_out = breader.readLine()) != null) {
+                                Log.log("РЕЗУЛЬТАТ УДАЛЕНИЯ: " + exec_out);
+                            }
+
+                            rmHelplessLog.waitFor();
+                        }
+                    }
+                } catch (Exception ex) {Log.log("Error no files route_log_for...");}
                 for (Server server : servers) {
+
                     File serverGwPingDir = new File("log/route_log_for_"+server.dst);
 
                     if (!serverGwPingDir.exists()) {
